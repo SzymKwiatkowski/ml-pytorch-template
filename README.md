@@ -12,3 +12,11 @@ cp templates/config.yaml.template config.yaml
 ```
 
 Then insert your required credentials
+
+## Pylint
+For linux bash pylint is supported via command:
+```bash
+bash pylint.sh
+```
+
+Either way add pylint to IDE or editor to work with project without failing on push.
