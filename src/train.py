@@ -1,30 +1,33 @@
-import pickle
+"""Training module"""
 from pathlib import Path
 import argparse
-import yaml
 import os
 
 import lightning.pytorch as pl
+from lightning.pytorch.loggers import NeptuneLogger, TensorBoardLogger
 
 from datamodules.datamodule import DataModule
 from models.model import Model
-
-
-def load_config(path: Path) -> dict:
-    with open(path, 'r') as file:
-        config = yaml.safe_load(file)
-    return config
+from utils.helpers import load_config
 
 
 def train(args):
+    """
+    :param args: parsed arguments
+    :rtype: None
+    """
+    # Overrides used graphic card
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-    config_file = args.config
-    max_epochs = args.epochs
-    config = load_config(config_file)
+    config = load_config(args.config)
     token = config['config']['NEPTUNE_API_TOKEN']
-    logger = pl.loggers.NeptuneLogger(
-        project='szymkwiatkowski/nc-net',
-        api_token=token)
+    project = config['config']['NEPTUNE_PROJECT']
+
+    if args.use_neptune:
+        logger = NeptuneLogger(
+            project=project,
+            api_token=token)
+    else:
+        logger = TensorBoardLogger(save_dir="logs/")
 
     pl.seed_everything(42, workers=True)
     patience = 25
@@ -39,7 +42,7 @@ def train(args):
         lr=2.55e-5,
         lr_patience=5,
         lr_factor=0.5,
-        model='controller',
+        n_classes=1000,
     )
 
     model.hparams.update(datamodule.hparams)
@@ -54,21 +57,16 @@ def train(args):
         logger=logger,
         devices=1,
         callbacks=[model_summary_callback, checkpoint_callback, early_stop_callback, lr_monitor],
-        accelerator='cuda',
-        strategy="ddp",
-        max_epochs=max_epochs
+        accelerator='cuda',  # change to 'cpu' if needed
+        max_epochs=args.epochs
     )
 
-    trainer.fit(model=model, datamodule=datamodule)
-    predictions = trainer.predict(model=model, ckpt_path=checkpoint_callback.best_model_path, datamodule=datamodule)
+    trainer.fit(model=model, train_dataloaders=datamodule.train_dataloader(),
+                val_dataloaders=datamodule.val_dataloader())
 
-    results = {}
-    for prediction in predictions:
-        for embedding, identifier in zip(*prediction):
-            results[identifier] = embedding.tolist()
+    results = trainer.test(model=model, ckpt_path=checkpoint_callback.best_model_path, datamodule=datamodule)
 
-    with open('results.pickle', 'wb') as file:
-        pickle.dump(results, file)
+    print(results)
 
 
 if __name__ == '__main__':
@@ -79,5 +77,5 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--config', action='store', default='config.yaml')
     parser.add_argument('-e', '--epochs', action='store', default=50,
                         type=int, help='Specified number of maximum epochs')
-    args = parser.parse_args()
-    train(args)
+    args_parsed = parser.parse_args()
+    train(args_parsed)

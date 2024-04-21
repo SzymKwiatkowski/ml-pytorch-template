@@ -1,3 +1,4 @@
+"""Datamodule implemention for learning dataset"""
 from pathlib import Path
 from typing import Optional
 
@@ -5,11 +6,12 @@ import pandas as pd
 from lightning import pytorch as pl
 from torch.utils.data import DataLoader
 
-from datamodules.dataset_split import DatasetSplits
-from datasets.controller import LearningDataset
+from datamodules.dataset_split import basic_split
+from datasets.dataset import LearningDataset
 
 
 class DataModule(pl.LightningDataModule):
+    """Class implementation for datamodule for learning dataset"""
     def __init__(
             self,
             data_path: Path,
@@ -32,7 +34,7 @@ class DataModule(pl.LightningDataModule):
     def setup(self, stage: Optional[str] = None):
         # Split if needed
         df = pd.read_csv(self._data_path / "train.csv")
-        train_places_dirs, val_places_dirs = DatasetSplits.basic_split(df, self._train_size)
+        train_places_dirs, val_places_dirs = basic_split(df, self._train_size)
 
         print(f'Number of train places: {len(train_places_dirs)}')
         print(f'Number of val places: {len(val_places_dirs)}')

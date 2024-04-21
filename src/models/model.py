@@ -1,16 +1,19 @@
+"""Implementation of lightning module"""
 import torch.linalg
 from lightning import pytorch as pl
 import torchmetrics
 
-from models.model_selection import BaseModels
+from models.model_selection import ModelSelection
 
 
+# pylint: disable=W0221
 class Model(pl.LightningModule):
+    """Class implementation of lightning module"""
     def __init__(self,
                  lr: float,
                  lr_patience: int,
                  lr_factor: float,
-                 model: str = 'controller'):
+                 n_classes: int):
         super().__init__()
 
         self.save_hyperparameters()
@@ -18,7 +21,7 @@ class Model(pl.LightningModule):
         self.lr = lr
         self.lr_factor = lr_factor
         self.lr_patience = lr_patience
-        model = getattr(BaseModels, model)
+        model = ModelSelection.resnet50_torchvision(n_classes, pretrained=True)
         self.network = model()
 
         metrics = torchmetrics.MetricCollection([
@@ -35,7 +38,7 @@ class Model(pl.LightningModule):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.network(x)
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch, _batch_idx):
         x, y = batch
         x = x.squeeze(0)
         y = y.squeeze(0)
@@ -45,7 +48,7 @@ class Model(pl.LightningModule):
         self.log_dict(self.train_metrics)
         return loss
 
-    def validation_step(self, batch, batch_idx) -> None:
+    def validation_step(self, batch, _batch_idx) -> None:
         inputs, labels = batch
         outputs = self(inputs)
         loss = self.loss_function(outputs, labels)
@@ -55,7 +58,7 @@ class Model(pl.LightningModule):
         self.log('val_loss', loss, prog_bar=True)
         self.log_dict(self.val_metrics)
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch, _batch_idx):
         inputs, labels = batch
         outputs = self(inputs)
         loss = self.loss_function(outputs, labels)
@@ -66,9 +69,18 @@ class Model(pl.LightningModule):
         self.log_dict(self.test_metrics)
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(self.parameters(), betas=(0.91, 0.9999), lr=self.lr, weight_decay=0.1, amsgrad=True)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, patience=self.lr_patience,
-                                                               factor=self.lr_factor)
+        optimizer = torch.optim.AdamW(
+            self.parameters(),
+            betas=(0.91, 0.9999),
+            lr=self.lr,
+            weight_decay=0.1,
+            amsgrad=True
+        )
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer,
+            patience=self.lr_patience,
+            factor=self.lr_factor
+        )
 
         return {
             'optimizer': optimizer,
