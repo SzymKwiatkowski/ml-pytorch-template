@@ -6,3 +6,4 @@ pip3 install tensorboard
 pip3 install pandas
 pip3 install scikit-learn
 pip3 install onnx
+pip3 install torchvision
