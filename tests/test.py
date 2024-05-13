@@ -60,7 +60,7 @@ class TestName(unittest.TestCase):
     def test_config_file(self):
         """Run test for config file"""
         root_dir = Path(os.getcwd())
-        config_path = root_dir / Path("../templates/config.yaml.template")
+        config_path = root_dir / Path("templates/config.yaml.template")
         config = load_config(config_path)
         self.assertIsNotNone(config)
         self.assertEqual(config['config']['NEPTUNE_API_TOKEN'], "f2137b")
