@@ -7,8 +7,9 @@ import unittest
 import doctest
 from pathlib import Path
 
-sys.path.append("../src")  # Add source dependencies to path 
+sys.path.append("../src")  # Add source dependencies to path
 
+# pylint: disable=C0413
 from train import load_config
 
 
