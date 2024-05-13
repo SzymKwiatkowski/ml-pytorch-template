@@ -1,8 +1,13 @@
 """Unit tests for train submodules"""
 
+import os
+import sys
+
 import unittest
 import doctest
 from pathlib import Path
+
+sys.path.append("../src")  # Add source dependencies to path 
 
 from train import load_config
 
@@ -53,7 +58,8 @@ class TestName(unittest.TestCase):
 
     def test_config_file(self):
         """Run test for config file"""
-        config_path = Path("templates/config.yaml.template")
+        root_dir = Path(os.getcwd())
+        config_path = root_dir / Path("../templates/config.yaml.template")
         config = load_config(config_path)
         self.assertIsNotNone(config)
         self.assertEqual(config['config']['NEPTUNE_API_TOKEN'], "f2137b")
