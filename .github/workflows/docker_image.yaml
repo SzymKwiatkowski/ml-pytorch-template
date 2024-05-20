@@ -10,5 +10,5 @@ jobs:
     - uses: actions/checkout@v4
     - name: Build the Docker image
       run: |
-      cp .devcontainer/Dockerfile .
-      docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+        cp .devcontainer/Dockerfile .
+        docker build . --file Dockerfile --tag my-image-name:$(date +%s)
