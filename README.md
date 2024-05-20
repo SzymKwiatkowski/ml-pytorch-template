@@ -1,4 +1,4 @@
-# ZPO Project
+# ML Pytorch Project Template
 
 ## Config
 Using template files provided and changing data to corresponding data you can use repository.
