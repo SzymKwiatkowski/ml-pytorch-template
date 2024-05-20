@@ -21,7 +21,7 @@ class Block(nn.Module):
         x = self.relu(x)
         x = self.conv2(x)
         x = self.bn2(x)
-        if self.identity_downsample is not None:
+        if self.identity_down_sample is not None:
             identity = self.identity_down_sample(identity)
         x += identity
         x = self.relu(x)

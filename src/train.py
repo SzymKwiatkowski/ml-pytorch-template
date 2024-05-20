@@ -34,15 +34,17 @@ def train(args):
 
     datamodule = DataModule(
         data_path=Path('data'),
-        batch_size=32,
+        batch_size=16,
         num_workers=4,
         train_size=0.8
     )
+
     model = Model(
         lr=2.55e-5,
         lr_patience=5,
         lr_factor=0.5,
         n_classes=1000,
+        model_selection="resnet18"
     )
 
     model.hparams.update(datamodule.hparams)
@@ -74,7 +76,7 @@ if __name__ == '__main__':
         prog='ProgramName',
         description='What the program does',
         epilog='Text at the bottom of help')
-    parser.add_argument('-c', '--config', action='store', default='config.yaml')
+    parser.add_argument('-c', '--config', action='store', default='../config.yaml')
     parser.add_argument('-e', '--epochs', action='store', default=50,
                         type=int, help='Specified number of maximum epochs')
     parser.add_argument('-d', '--data', action='store', default="../data",

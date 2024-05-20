@@ -41,14 +41,14 @@ class ResNet18(nn.Module):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
-        x = self.maxpool(x)
+        x = self.max_pool(x)
 
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
 
-        x = self.avgpool(x)
+        x = self.avg_pool(x)
         x = x.view(x.shape[0], -1)
         x = self.fc(x)
         return x

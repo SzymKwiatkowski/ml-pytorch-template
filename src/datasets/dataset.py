@@ -3,25 +3,22 @@ from pathlib import Path
 
 import torch
 from torch.utils.data import Dataset
-import pandas as pd
+import numpy as np
 
 
 # Remove when implementing dataset
 # pylint: disable=W0511
 class LearningDataset(Dataset):
     """Class implementing dataset for learning."""
-    def __init__(self,
-                 path_to_file: Path):
+    def __init__(self):
         super().__init__()
-
-        self._path_to_file = path_to_file
-        self._df = pd.read_csv(path_to_file)
-        self.x = torch.randn(3, 520, 520)
-        self.y = torch.randn(1000)
+        
+        self.arr = np.array(np.random.rand(100, 3, 520, 520), dtype=np.float32)
+        self.y = np.array(np.random.rand(100, 1000), dtype=np.float32)
 
     # TODO: Return x,y of dataset
-    def __getitem__(self, _: int) -> tuple[torch.Tensor, torch.Tensor]:
-        return self.x, self.y
+    def __getitem__(self, i: int) -> tuple[torch.Tensor, torch.Tensor]:
+        return torch.from_numpy(self.arr[i]), torch.from_numpy(self.y[i])
 
     def __len__(self) -> int:
-        return 1
+        return len(self.arr)

@@ -28,28 +28,14 @@ class DataModule(pl.LightningDataModule):
         self.train_dataset = None
         self.val_dataset = None
         self.test_dataset = None
+        
+        self.train_dataset = LearningDataset()
+
+        self.val_dataset = LearningDataset()
+
+        self.test_dataset = LearningDataset()
 
         self.save_hyperparameters(ignore=['data_path', 'number_of_workers'])
-
-    def setup(self, stage: Optional[str] = None):
-        # Split if needed
-        df = pd.read_csv(self._data_path / "train.csv")
-        train_places_dirs, val_places_dirs = basic_split(df, self._train_size)
-
-        print(f'Number of train places: {len(train_places_dirs)}')
-        print(f'Number of val places: {len(val_places_dirs)}')
-
-        self.train_dataset = LearningDataset(
-            self._data_path / 'train.csv'
-        )
-
-        self.val_dataset = LearningDataset(
-            self._data_path / 'val.csv'
-        )
-
-        self.test_dataset = LearningDataset(
-            self._data_path / 'test.csv'
-        )
 
     def train_dataloader(self):
         return DataLoader(

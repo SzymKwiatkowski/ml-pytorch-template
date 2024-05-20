@@ -13,7 +13,8 @@ class Model(pl.LightningModule):
                  lr: float,
                  lr_patience: int,
                  lr_factor: float,
-                 n_classes: int):
+                 n_classes: int,
+                 model_selection: str = "resnet18"):
         super().__init__()
 
         self.save_hyperparameters()
@@ -21,8 +22,17 @@ class Model(pl.LightningModule):
         self.lr = lr
         self.lr_factor = lr_factor
         self.lr_patience = lr_patience
-        model = ModelSelection.resnet50_torchvision(n_classes, pretrained=True)
-        self.network = model()
+        self.loss_function = torch.nn.CrossEntropyLoss();
+        
+        match model_selection:
+            case "resnet18":
+                self.network = ModelSelection.resnet18_custom_model(n_classes)
+            case "resnet50":
+                self.network = ModelSelection.resnet50_torchvision(n_classes, pretrained=True)
+            case _:
+                self.network = ModelSelection.resnet18_custom_model(n_classes)
+
+        assert self.network is not None, "Selected network is not valid therefore training is aborted"
 
         metrics = torchmetrics.MetricCollection([
             torchmetrics.MeanAbsoluteError(),
@@ -43,7 +53,7 @@ class Model(pl.LightningModule):
         x = x.squeeze(0)
         y = y.squeeze(0)
         y_pred = self.forward(x)
-        loss = self.loss_function(y_pred, y, self.miner(y_pred, y))
+        loss = self.loss_function(y_pred, y)
         self.log('train_loss', loss, sync_dist=True, prog_bar=True)
         self.log_dict(self.train_metrics)
         return loss
