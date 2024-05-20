@@ -1,12 +1,9 @@
 """Datamodule implemention for learning dataset"""
 from pathlib import Path
-from typing import Optional
 
-import pandas as pd
 from lightning import pytorch as pl
 from torch.utils.data import DataLoader
 
-from datamodules.dataset_split import basic_split
 from datasets.dataset import LearningDataset
 
 
@@ -25,14 +22,8 @@ class DataModule(pl.LightningDataModule):
         self._num_workers = num_workers
         self._train_size = train_size
 
-        self.train_dataset = None
-        self.val_dataset = None
-        self.test_dataset = None
-        
         self.train_dataset = LearningDataset()
-
         self.val_dataset = LearningDataset()
-
         self.test_dataset = LearningDataset()
 
         self.save_hyperparameters(ignore=['data_path', 'number_of_workers'])

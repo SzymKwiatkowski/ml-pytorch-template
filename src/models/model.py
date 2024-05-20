@@ -6,7 +6,7 @@ import torchmetrics
 from models.model_selection import ModelSelection
 
 
-# pylint: disable=W0221
+# pylint: disable=W0221, R0913, R0902
 class Model(pl.LightningModule):
     """Class implementation of lightning module"""
     def __init__(self,
@@ -22,8 +22,8 @@ class Model(pl.LightningModule):
         self.lr = lr
         self.lr_factor = lr_factor
         self.lr_patience = lr_patience
-        self.loss_function = torch.nn.CrossEntropyLoss();
-        
+        self.loss_function = torch.nn.CrossEntropyLoss()
+
         match model_selection:
             case "resnet18":
                 self.network = ModelSelection.resnet18_custom_model(n_classes)

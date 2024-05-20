@@ -1,6 +1,4 @@
 """Module implementing class dataset"""
-from pathlib import Path
-
 import torch
 from torch.utils.data import Dataset
 import numpy as np
@@ -12,7 +10,6 @@ class LearningDataset(Dataset):
     """Class implementing dataset for learning."""
     def __init__(self):
         super().__init__()
-        
         self.arr = np.array(np.random.rand(100, 3, 520, 520), dtype=np.float32)
         self.y = np.array(np.random.rand(100, 1000), dtype=np.float32)
 
